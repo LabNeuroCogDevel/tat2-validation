@@ -7,6 +7,33 @@ This code lives on briges/PSC
 `/ocean/projects/soc230004p/shared/tat2-validation`
 
 ## Permutations
+### Inspecting
+
+`tat2` saves a `.log.json` file along side the nifiti image. This may be easier to parse than the `3dNotes` embeded in the image file.
+
+```
+jq -r '[(input_filename|split("_")|.[7]), .expr]|@tsv' \
+   data/10195_20160317/pet1/_ref-wholebrain_time-median_vol-median_censor-fd0.3_inverse-no_calc-*json|
+   sort -u
+
+calc-default    (x/m)*1
+calc-log        -1*log(x/m)*1
+calc-novol      (x/m)*m*1
+calc-zscore     (x-m)/s*1
+```
+
+
+```
+3dNotes_each -f \
+ data/10195_20160317/pet1/_ref-wholebrain_time-median_vol-median_censor-fd0.3_inverse-no_calc-*nii.gz|
+ perl -lne 'print "$1\t$2" if m/(calc-[a-z]+).*expr ([^ ]*)/'
+calc-default    '(x/m)*1'
+calc-log        '-1*log(x/m)*1'
+calc-novol      '(x/m)*m*1'
+calc-zscore     '(x-m)/s*1'
+```
+
+### Enumerated
 from 
 ```
 COMBO_NAME_ONLY=1 scripts/tat2_visit.bash |
