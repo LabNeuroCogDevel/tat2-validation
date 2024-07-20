@@ -6,4 +6,4 @@ squeue -o %j | grep $jobname && echo "# $jobname in queue, skipping" && exit #co
 sbatch \
       -J $jobname \
       -o $logfile -e $logfile \
-      tat2_subj.bash 10195_20160317
+      tat2_visit.bash 10195_20160317
