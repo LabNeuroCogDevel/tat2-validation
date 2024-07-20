@@ -6,5 +6,4 @@ squeue -o %j | grep $jobname && echo "# $jobname in queue, skipping" && exit #co
 sbatch \
       -J $jobname \
       -o $logfile -e $logfile \
-      --export "BOLD_FILE=$bold" \
       tat2_subj.bash 10195_20160317
