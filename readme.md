@@ -42,48 +42,26 @@ COMBO_NAME_ONLY=1 scripts/tat2_visit.bash |
   pandoc -f tsv -t gfm -
 ```
 
-| ref        | time   |  vol   |censor |inverse|calc   |scale     |
-| ---------- |------- |--------|-------|-----|---------| -------- |
-| wholebrain | median | median | fd0.3 | no  | default | none     |
-| wholebrain | median | median | fd0.3 | no  | zscore  | none     |
-| wholebrain | median | median | fd0.3 | no  | log     | none     |
-| wholebrain | median | median | fd0.3 | no  | novol   | none     |
-| wholebrain | median | median | fd0.3 | yes | default | none     |
-| wholebrain | median | median | fd0.3 | yes | zscore  | none     |
-| wholebrain | median | median | fd0.3 | yes | log     | none     |
-| wholebrain | median | median | fd0.3 | yes | novol   | none     |
-| wholebrain | median | mean   | fd0.3 | no  | default | 1000nvox |
-| wholebrain | median | mean   | fd0.3 | no  | default | none     |
-| wholebrain | median | mean   | fd0.3 | no  | zscore  | none     |
-| wholebrain | median | mean   | fd0.3 | no  | log     | none     |
-| wholebrain | median | mean   | fd0.3 | no  | novol   | 1000nvox |
-| wholebrain | median | mean   | fd0.3 | no  | novol   | none     |
-| wholebrain | median | mean   | fd0.3 | yes | default | 1000nvox |
-| wholebrain | median | mean   | fd0.3 | yes | default | none     |
-| wholebrain | median | mean   | fd0.3 | yes | zscore  | none     |
-| wholebrain | median | mean   | fd0.3 | yes | log     | none     |
-| wholebrain | median | mean   | fd0.3 | yes | novol   | 1000nvox |
-| wholebrain | median | mean   | fd0.3 | yes | novol   | none     |
-| wholebrain | mean   | median | fd0.3 | no  | default | none     |
-| wholebrain | mean   | median | fd0.3 | no  | zscore  | none     |
-| wholebrain | mean   | median | fd0.3 | no  | log     | none     |
-| wholebrain | mean   | median | fd0.3 | no  | novol   | none     |
-| wholebrain | mean   | median | fd0.3 | yes | default | none     |
-| wholebrain | mean   | median | fd0.3 | yes | zscore  | none     |
-| wholebrain | mean   | median | fd0.3 | yes | log     | none     |
-| wholebrain | mean   | median | fd0.3 | yes | novol   | none     |
-| wholebrain | mean   | mean   | fd0.3 | no  | default | 1000nvox |
-| wholebrain | mean   | mean   | fd0.3 | no  | default | none     |
-| wholebrain | mean   | mean   | fd0.3 | no  | zscore  | none     |
-| wholebrain | mean   | mean   | fd0.3 | no  | log     | none     |
-| wholebrain | mean   | mean   | fd0.3 | no  | novol   | 1000nvox |
-| wholebrain | mean   | mean   | fd0.3 | no  | novol   | none     |
-| wholebrain | mean   | mean   | fd0.3 | yes | default | 1000nvox |
-| wholebrain | mean   | mean   | fd0.3 | yes | default | none     |
-| wholebrain | mean   | mean   | fd0.3 | yes | zscore  | none     |
-| wholebrain | mean   | mean   | fd0.3 | yes | log     | none     |
-| wholebrain | mean   | mean   | fd0.3 | yes | novol   | 1000nvox |
-| wholebrain | mean   | mean   | fd0.3 | yes | novol   | none     |
+| ref        | time   |  vol   |censor |calc     |scale     |
+| ---------- |------- |--------|-------|---------| -------- |
+| wholebrain | median | median | fd0.3 | default | none     |
+| wholebrain | median | median | fd0.3 | zscore  | none     |
+| wholebrain | median | median | fd0.3 | log     | none     |
+| wholebrain | median | median | fd0.3 | novol   | none     |
+| wholebrain | median | mean   | fd0.3 | default | 1000nvox |
+| wholebrain | median | mean   | fd0.3 | default | none     |
+| wholebrain | median | mean   | fd0.3 | zscore  | none     |
+| wholebrain | median | mean   | fd0.3 | log     | none     |
+| wholebrain | median | mean   | fd0.3 | novol   | none     |
+| wholebrain | mean   | median | fd0.3 | default | none     |
+| wholebrain | mean   | median | fd0.3 | zscore  | none     |
+| wholebrain | mean   | median | fd0.3 | log     | none     |
+| wholebrain | mean   | median | fd0.3 | novol   | none     |
+| wholebrain | mean   | mean   | fd0.3 | default | 1000nvox |
+| wholebrain | mean   | mean   | fd0.3 | default | none     |
+| wholebrain | mean   | mean   | fd0.3 | zscore  | none     |
+| wholebrain | mean   | mean   | fd0.3 | log     | none     |
+| wholebrain | mean   | mean   | fd0.3 | novol   | none     |
 
 # Log
 20231219   - added atlas/ ->  `/Volumes/Hera/Projects/BTC_tat2validate/data/atlases`

@@ -3,6 +3,12 @@
 #SBATCH --partition=RM-shared
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
+# globals
+#  REST_NUM        - default to 1 for rac1)
+#  SUBJECT         - will use $1 if no SUBJECT
+#  COMBO_NAME_ONLY - show output combinations, but dont run
+#  DRYRUN          - show all tat2 commands, but dont run (will create fd censor file if DNE)
+# 
 export OUT_DIR=/ocean/projects/soc230004p/shared/datasets/tat2
 export DATA_ROOT=/ocean/projects/soc230004p/shared/datasets/rest_preproc/pet
 export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/projects/soc230004p/shared/tools/afni"
@@ -53,9 +59,9 @@ if [ -z "${COMBO_NAME_ONLY:-}" ] ; then
   outdir=$OUT_DIR/$ld8/pet1
 
   # need bold and motion correction framewise displacement file
-  input_bold=$DATA_ROOT/petrest_rac1/brnsuwdktm_rest/$ld8/wudktm_func.nii.gz
+  input_bold=$DATA_ROOT/petrest_rac${REST_NUM:-1}/brnsuwdktm_rest/$ld8/wudktm_func.nii.gz
   [ ! -r $input_bold ] && warn "# $ld8 missing bold input '$input_bold'" && exit 1
-  fd_file=$DATA_ROOT/petrest_rac1/brnsuwdktm_rest/$ld8/motion_info/fd.txt
+  fd_file=$DATA_ROOT/petrest_rac${REST_NUM:-1}/brnsuwdktm_rest/$ld8/motion_info/fd.txt
   [ ! -r "$fd_file" ] && warn "# $ld8 missing fd '$fd_file'" && exit 1
 
   # can make censor file if needed
@@ -68,13 +74,14 @@ i=0
 for ref in subject_mask.nii.gz; do
   for timeopt in  -median_time -mean_time; do
     for volopt in -median_vol -mean_vol; do
-      for inverse in '' -inverse; do
+      #for inverse in '' -inverse; do
         for calc in '' -calc_zscore -calc_ln -no_vol; do
           for scale in '' -no_voxscale; do
-            [[ -z "$scale" && ( $calc =~ calc_(zscore|ln) || $volopt =~ median ) ]] && continue
+            [[ -z "$scale" && ( $calc =~ (no_vol|calc_(zscore|ln)) || $volopt =~ median ) ]] && continue
 	    for censor in "-censor_rel motion_info/censor_fd-$FD_THRESH.1D"; do
 	      let ++i
-	      name="$(_name ref)$(_name timeopt)$(_name volopt)$(_name censor)$(_name inverse)$(_name calc)$(_name scale)"
+	      # $(_name inverse)
+	      name="$(_name ref)$(_name timeopt)$(_name volopt)$(_name censor)$(_name calc)$(_name scale)"
               [ -n "${COMBO_NAME_ONLY:-}" ] && echo "$name" && break
               output=$outdir/${name}_tat2.nii.gz
 	      tic=$(date +%s)
@@ -89,14 +96,14 @@ for ref in subject_mask.nii.gz; do
                 -tmp ${LOCAL:-/tmp} \
                 $input_bold
 	      toc=$(date +%s)
-	      echo "# [$(date +%F\ %H:%M.%S)] FINISH:$i; $(($toc-$tic)) secs"
-	    done
-          done
-        done
-      done
-    done
-  done
-done
+	      echo "# [$(date +%F\ %H:%M.%S)] FINISH:$i; $(($toc-$tic)) secs; $ld8 $name"
+	    done # cen
+          done # scale
+        done # calc
+      # done # inv
+    done # vol
+  done # time
+done # ref
 }
 
 eval "$(iffmain run_subj)"
