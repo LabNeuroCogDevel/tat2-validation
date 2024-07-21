@@ -55,14 +55,24 @@ mk_censor(){
 
 run_subj(){
 start_tic=$(date +%s)
+
+# only care about subject when actually running
+# dont generate files if just generating a list of output paramater combos
 if [ -z "${COMBO_NAME_ONLY:-}" ] ; then
+
+  # id is either from SUBJECT or the first input argument
   ld8=${SUBJECT:-$1} #10195_20160317
-  outdir=$OUT_DIR/$ld8/pet1
+
+  # defualt to first run (petrest_rac1)
+  # ./01_queue_tat2.bash will export REST_NUM=2 for petrest_rac2
+  run_num=${REST_NUM:-1}
+
+  outdir=$OUT_DIR/$ld8/pet$run_num
 
   # need bold and motion correction framewise displacement file
-  input_bold=$DATA_ROOT/petrest_rac${REST_NUM:-1}/brnsuwdktm_rest/$ld8/wudktm_func.nii.gz
+  input_bold=$DATA_ROOT/petrest_rac$run_num/brnsuwdktm_rest/$ld8/wudktm_func.nii.gz
   [ ! -r $input_bold ] && warn "# $ld8 missing bold input '$input_bold'" && exit 1
-  fd_file=$DATA_ROOT/petrest_rac${REST_NUM:-1}/brnsuwdktm_rest/$ld8/motion_info/fd.txt
+  fd_file=$(dirname "$input_bold")/motion_info/fd.txt
   [ ! -r "$fd_file" ] && warn "# $ld8 missing fd '$fd_file'" && exit 1
 
   # can make censor file if needed
