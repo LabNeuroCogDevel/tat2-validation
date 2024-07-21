@@ -3,7 +3,7 @@
 #
 # 20240718WF - init
 for rnum in 1 2; do
- rsync -azvhi \
+ rsync -L -azvhi \
    /Volumes/Hera/preproc/petrest_rac$rnum/brnsuwdktm_rest \
    bridges2:/ocean/projects/soc230004p/shared/datasets/rest_preproc/pet/petrest_rac$rnum/ \
    `#--dry-run` \
@@ -13,7 +13,7 @@ for rnum in 1 2; do
    --include '*/*/motion_info/fd.txt' \
    --exclude '*/*/*/*' \
    --include '*/*/motion.par' \
-   --include '*/*/subject_mask.nii.gz' \
+   `# --include '*/*/subject_mask.nii.gz'` \
    --include '*/*/wudktm_func.nii.gz' \
    --include '*/*/wktm_func_98_2_mask_dil1x_templateTrim.nii.gz' \
    --exclude '*/*/*'
