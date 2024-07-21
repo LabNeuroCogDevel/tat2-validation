@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
-source $(dirname $0)/../../setup_path.sh
 #
 # submit jobs (tat2_visit.bash) for each visit and rac1+rac2
 # use DRYRUN=1 ./01_queue_tat2.bash
 
 # to see all combinations, look at ../readme.md or
 #  COMBO_NAME_ONLY=1 ./tat2_subj.bash | column -ts_
+
+
+cd "$(dirname "$0")"
+source ../../setup_path.sh
 mkdir -p log
 
 for rest in 1 2; do
