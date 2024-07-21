@@ -54,6 +54,7 @@ mk_censor(){
 
 
 run_subj(){
+start_tic=$(date +%s)
 if [ -z "${COMBO_NAME_ONLY:-}" ] ; then
   ld8=${SUBJECT:-$1} #10195_20160317
   outdir=$OUT_DIR/$ld8/pet1
@@ -71,6 +72,8 @@ if [ -z "${COMBO_NAME_ONLY:-}" ] ; then
 fi
 
 i=0
+inverse="" # disabled b/c have 'calc_ln'
+
 for ref in subject_mask.nii.gz; do
   for timeopt in  -median_time -mean_time; do
     for volopt in -median_vol -mean_vol; do
@@ -104,6 +107,9 @@ for ref in subject_mask.nii.gz; do
     done # vol
   done # time
 done # ref
+
+stop_toc=$(date +%s)
+echo "# [$(date +%F\ %H:%M.%S)] DONE; $(($stop_toc-$start_tic)) secs"
 }
 
 eval "$(iffmain run_subj)"
