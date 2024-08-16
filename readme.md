@@ -5,6 +5,8 @@ As of 20240718, now includes PSC scripts as well
 
 This code lives on briges/PSC
 `/ocean/projects/soc230004p/shared/tat2-validation`
+and on rhea
+`/Volumes/Hera/Projects/tat2`
 
 ## Permutations
 ### Inspecting
