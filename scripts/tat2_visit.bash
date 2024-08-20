@@ -8,7 +8,7 @@
 #  SUBJECT         - will use $1 if no SUBJECT
 #  COMBO_NAME_ONLY - show output combinations, but dont run
 #  DRYRUN          - show all tat2 commands, but dont run (will create fd censor file if DNE)
-# 
+#
 export OUT_DIR=/ocean/projects/soc230004p/shared/datasets/tat2
 export DATA_ROOT=/ocean/projects/soc230004p/shared/datasets/rest_preproc/pet
 export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/projects/soc230004p/shared/tools/afni"
@@ -17,6 +17,8 @@ export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/proj
 #                   '| column -ts_' for a table fo all runs
 
 FD_THRESH=0.3
+
+REF_CC=$(readlink -f $(dirname "$0")/../atlases/ref/JHU-ICBM-CCbody_res-func.nii.gz)
 
 # '_var-$var'
 _name() {
@@ -35,10 +37,15 @@ _name() {
   varval=$(perl -pe 's/(mean|median)_(time|vol)/$1/' <<< "${varval}")
   case $varval in
     *no_voxscale) varval=none;;
+    # ref
     *subject_mask*) varval=wholebrain;;
+    *CC*.nii.gz)    varval=CC;;
+    # calcs
     *zscore*)  varval=zscore;;
     *calc_ln)  varval=log;;
+    #
     *inverse) varval=yes;;
+    # censor_rel
     *1D)
 	    [[ $varval =~ (fd-[0-9.]+).*.1D ]] &&
 		    varval=${BASH_REMATCH[1]} ||
@@ -54,6 +61,9 @@ mk_censor(){
 
 
 run_subj(){
+
+[ ! -r $REF_CC ] && echo "cannot read CC ref region mask '$REF_CC'" && return 1
+
 start_tic=$(date +%s)
 
 # only care about subject when actually running
@@ -82,35 +92,42 @@ if [ -z "${COMBO_NAME_ONLY:-}" ] ; then
 fi
 
 i=0
+local skip_count=0
 inverse="" # disabled b/c have 'calc_ln'
 
-for ref in subject_mask.nii.gz; do
+for ref in subject_mask.nii.gz "$REF_CC"; do
   for timeopt in  -median_time -mean_time; do
     for volopt in -median_vol -mean_vol; do
       #for inverse in '' -inverse; do
         for calc in '' -calc_zscore -calc_ln -no_vol; do
+          # only need to do the no volume normalization once for all ref regions
+          [[ $ref != "subject_mask.nii.gz" && $calc == "-no_vol" ]] && continue
+
           for scale in '' -no_voxscale; do
             [[ -z "$scale" && ( $calc =~ (no_vol|calc_(zscore|ln)) || $volopt =~ median ) ]] && continue
-	    for censor in "-censor_rel motion_info/censor_fd-$FD_THRESH.1D"; do
-	      let ++i
-	      # $(_name inverse)
-	      name="$(_name ref)$(_name timeopt)$(_name volopt)$(_name censor)$(_name calc)$(_name scale)"
+            for censor in "-censor_rel motion_info/censor_fd-$FD_THRESH.1D"; do
+              let ++i
+              # $(_name inverse)
+              name="$(_name ref)$(_name timeopt)$(_name volopt)$(_name censor)$(_name calc)$(_name scale)"
               [ -n "${COMBO_NAME_ONLY:-}" ] && echo "$name" && break
               output=$outdir/${name}_tat2.nii.gz
-	      tic=$(date +%s)
+              tic=$(date +%s)
               echo  "# [$(date +%F\ %H:%M.%S)] START:$i; $ld8 $name"
-              [ -r "$output" ] && continue
+              if [ -r "$output" ]; then
+                let ++skip_count
+                continue
+              fi
 
-	      dryrun mkdir -p $outdir
+              dryrun mkdir -p $outdir
               dryrun tat2 $timeopt $volopt $inverse $calc $scale \
-                -mask_rel "$ref" \
-	        $censor \
-                -output $output \
-                -tmp ${LOCAL:-/tmp} \
-                $input_bold
-	      toc=$(date +%s)
-	      echo "# [$(date +%F\ %H:%M.%S)] FINISH:$i; $(($toc-$tic)) secs; $ld8 $name"
-	    done # cen
+                 -mask_rel "$ref" \
+                 $censor \
+                 -output $output \
+                 -tmp ${LOCAL:-/tmp} \
+                 $input_bold
+              toc=$(date +%s)
+              echo "# [$(date +%F\ %H:%M.%S)] FINISH:$i; $(($toc-$tic)) secs; $ld8 $name"
+           done # cen
           done # scale
         done # calc
       # done # inv
@@ -119,7 +136,17 @@ for ref in subject_mask.nii.gz; do
 done # ref
 
 stop_toc=$(date +%s)
-echo "# [$(date +%F\ %H:%M.%S)] DONE; $(($stop_toc-$start_tic)) secs"
+echo "# [$(date +%F\ %H:%M.%S)] DONE; $(($stop_toc-$start_tic)) secs; $i total; $skip_count skipped (already existed)"
 }
 
 eval "$(iffmain run_subj)"
+
+test_ref_name() { # @test
+  ref=subject_mask.nii.gz
+  name=$(_name ref)
+  [[ $name == "wholebrain" ]]
+
+  ref=blahblabh/blahCCblah.nii.gz
+  name=$(_name ref)
+  [[ $name == "CC" ]]
+}
