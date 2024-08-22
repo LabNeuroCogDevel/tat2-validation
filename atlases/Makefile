@@ -27,10 +27,11 @@ ref/ventricles_res-func.nii.gz: ref/CerebrA.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle-cerebra.nii.gz
 
 atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
+	# c and v overlap in 24mm. assign to c instead of v
 	3dcalc -v ref/ventricles_res-func.nii.gz \
 	       -c ref/JHU-ICBM-CCbody_res-func.nii.gz \
 	       -h  HarOx-thr50-CaudPutPalAcc_res-func.nii.gz \
-	       -expr '1*v + 2*step(c) + h' \
+	       -expr '1*v*step(v-c) + 2*c + h' \
 	       -prefix $@
 
 HarOx-thr50-CaudPutPalAcc_res-func.nii.gz: HarvardOxford-sub-maxprob-thr50-1mm.nii.gz
