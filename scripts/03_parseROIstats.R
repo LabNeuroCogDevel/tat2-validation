@@ -30,8 +30,11 @@ roistats_long_lab <- roistats_long |> merge(labs, by="roinum")
 ## resampe to semi wide -- one row per roi+run pair (NZMean,NZsigma, and NZ voxel count)
 roistats_per_roi <- roistats_long_lab |> pivot_wider(names_from=measure,values_from=value)
 
-file_info <- read.table('../stats/run_info.tsv',header=T) |> mutate(filename=gsub('.log.json','',filename))
-roistats_info <- merge(roistats_per_roi, file_info, by.x="fname",by.y="filename")
+file_info <- read.table('../stats/run_info.tsv',header=T) |>
+ mutate(filename=gsub('../output/|.log.json$','',filename)) |>
+ separate(filename,c("id","run","fname"),sep="/")
+roistats_info <- merge(roistats_per_roi, file_info, by=c("id","run","fname"))
 
+cat("# writting ", nrow(roistats_info), "rows\n")
 write.csv(roistats_info, file='../stats/CaudPutPalAccVentCC.csv', row.names=F, quote=F)
 
