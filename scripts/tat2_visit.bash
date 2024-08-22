@@ -11,6 +11,7 @@
 #
 export OUT_DIR=/ocean/projects/soc230004p/shared/datasets/tat2
 export DATA_ROOT=/ocean/projects/soc230004p/shared/datasets/rest_preproc/pet
+ATLAS_DIR="/ocean/projects/soc230004p/shared/tat2-validation/atlases/"
 export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/projects/soc230004p/shared/tools/afni"
 
 # COMBO_NAME_ONLY - externally set to show only combinations
@@ -18,7 +19,7 @@ export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/proj
 
 FD_THRESH=0.3
 
-REF_CC=$(readlink -f $(dirname "$0")/../atlases/ref/JHU-ICBM-CCbody_res-func.nii.gz)
+REF_CC="$ATLAS_DIR/ref/JHU-ICBM-CCbody_res-func.nii.gz"
 
 # '_var-$var'
 _name() {
@@ -62,7 +63,7 @@ mk_censor(){
 
 run_subj(){
 
-[ ! -r $REF_CC ] && echo "cannot read CC ref region mask '$REF_CC'" && return 1
+[ -z "$REF_CC" -o ! -r "$REF_CC" ] && echo "cannot read CC ref region mask '$REF_CC'" && return 1
 
 start_tic=$(date +%s)
 
@@ -144,9 +145,10 @@ eval "$(iffmain run_subj)"
 test_ref_name() { # @test
   ref=subject_mask.nii.gz
   name=$(_name ref)
-  [[ $name == "wholebrain" ]]
+  echo $name >&2
+  [[ $name == "_ref-wholebrain" ]]
 
   ref=blahblabh/blahCCblah.nii.gz
   name=$(_name ref)
-  [[ $name == "CC" ]]
+  [[ $name == "_ref-CC" ]]
 }
