@@ -1,0 +1,7 @@
+output
+pet_preproc
+log
+stats/run_info.tsv
+stats/atlas-roistats.tsv
+atlases/ref/CerebrA.nii.gz
+atlases/ref/CerebrA.nii
