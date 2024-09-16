@@ -20,6 +20,7 @@ export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/proj
 FD_THRESH=0.3
 
 REF_CC="$ATLAS_DIR/ref/JHU-ICBM-CCbody_res-func.nii.gz"
+REF_VENT="$ATLAS_DIR/ref/ventricles_res-func.nii.gz"
 
 # '_var-$var'
 _name() {
@@ -41,6 +42,7 @@ _name() {
     # ref
     *subject_mask*) varval=wholebrain;;
     *CC*.nii.gz)    varval=CC;;
+    *ventricles*.nii.gz) varval=vent;;
     # calcs
     *zscore*)  varval=zscore;;
     *calc_ln)  varval=log;;
@@ -64,6 +66,7 @@ mk_censor(){
 run_subj(){
 
 [ -z "$REF_CC" -o ! -r "$REF_CC" ] && echo "cannot read CC ref region mask '$REF_CC'" && return 1
+[ -z "$REF_VENT" -o ! -r "$REF_VENT" ] && echo "cannot read CC ref region mask '$REF_VENT'" && return 1
 
 start_tic=$(date +%s)
 
@@ -96,7 +99,7 @@ i=0
 local skip_count=0
 inverse="" # disabled b/c have 'calc_ln'
 
-for ref in subject_mask.nii.gz "$REF_CC"; do
+for ref in subject_mask.nii.gz "$REF_CC" "$REF_VENT"; do
   for timeopt in  -median_time -mean_time; do
     for volopt in -median_vol -mean_vol; do
       #for inverse in '' -inverse; do
@@ -151,4 +154,8 @@ test_ref_name() { # @test
   ref=blahblabh/blahCCblah.nii.gz
   name=$(_name ref)
   [[ $name == "_ref-CC" ]]
+
+  ref=$REF_VENT
+  name=$(_name ref)
+  [[ $name == "_ref-vent" ]]
 }
