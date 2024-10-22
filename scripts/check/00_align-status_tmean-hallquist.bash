@@ -5,7 +5,8 @@
 # 20240926WF - init
 # 20241022WF - move script, add tests to not rerun
 #
-cd all_nii/ || exit 1
+mkdir -p "$(dirname "$0")"/all_nii && cd "$_" || exit 1
+
 test -r all_meants.nii.gz ||
   4dConcatSubBriks -o all_meants.nii.gz -- meants/*.nii.gz
 test -r mean_meants.nii.gz ||

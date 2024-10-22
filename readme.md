@@ -8,6 +8,12 @@ This code lives on briges/PSC
 and on rhea
 `/Volumes/Hera/Projects/tat2`
 
+## Data quality
+[`scripts/check/`](scripts/check) calculates metrics to assess warp quality across the dataset
+  * Warps [`scripts/check/all_nii/bad_alignments.csv`](scripts/check/all_nii/bad_alignments.csv) from [`scripts/check/all_nii/all_meants_enorm.1D`](scripts/check/all_nii/all_meants_enorm.1D)
+  * Ventrical roi stats [`scripts/check/vent_summary_zscored.tsv`](scripts/check/vent_summary_zscored.tsv)
+
+
 ## Permutations
 ### Inspecting
 
