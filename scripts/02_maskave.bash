@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --time=2:30:00
+#SBATCH --time=4:30:00
 #SBATCH --partition=RM-shared
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
