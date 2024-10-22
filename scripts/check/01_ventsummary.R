@@ -19,7 +19,7 @@ d.long <- d %>%
    group_by(measure) %>%
    mutate(zscore=scale(value))
 
-write.csv(d.long, "check/vent_summary_zscored.tsv",row.names=F)
+write.csv(d.long, "check/vent_summary_zscored.csv",row.names=F)
 
 bad <- d.long %>% filter(abs(zscore)>3, !grepl('count', measure)) %>%
    group_by(name) %>%
