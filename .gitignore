@@ -5,3 +5,5 @@ stats/run_info.tsv
 stats/atlas-roistats.tsv
 atlases/ref/CerebrA.nii.gz
 atlases/ref/CerebrA.nii
+!atlases/*nii.gz
+*nii.gz
