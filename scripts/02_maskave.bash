@@ -6,7 +6,8 @@
 
 # run like
 #  sbatch -J summary -o log/%x_%A_%j.txt 02_maskave.bash
-#  always remakes ../stats/: CaudPutPalAcc.tsv run_info.tsv
+#  always remakes ../stats/: atlas-roistats.tsv run_info.tsv
+#  see scripts/03_parseROIstats.R to make CaudPutPalAccVentCC.csv
 set -euo pipefail
 
 # start in this scripts directory. and maybe setup PSC
@@ -29,7 +30,7 @@ mapfile -t mask_args < <(
             echo -e "-m\n${roiname/ /}=$roi_atlas<$idx>"
     done)
 
-
+echo "# running maskave"
 echo "# nifti $(date)"
 mkdir -p ../stats
 # this is too slow! takes over 2h 30min to run on only half the ROIs!

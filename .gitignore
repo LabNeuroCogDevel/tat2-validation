@@ -7,3 +7,6 @@ atlases/ref/CerebrA.nii.gz
 atlases/ref/CerebrA.nii
 !atlases/*nii.gz
 *nii.gz
+.RData
+.Rhistory
+slurm*out
