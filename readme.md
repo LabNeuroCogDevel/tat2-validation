@@ -1,5 +1,5 @@
-# tat2
-`tat2` paper scripts.
+# T2* Validation
+Running many parameter permutations of [`tat2`](https://github.com/lncd/lncdtools/blob/master/tat2) [![DOI](https://zenodo.org/badge/152143120.svg)](https://zenodo.org/badge/latestdoi/152143120)
 
 ROI means for tat2 parameter permutations are in [`stats/CaudPutPalAccVentCC.csv`](stats/CaudPutPalAccVentCC.csv)
 
