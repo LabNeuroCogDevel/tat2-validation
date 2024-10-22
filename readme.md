@@ -1,7 +1,11 @@
 # tat2
-tat2 paper scripts.
-Intially, this directory links to other directorys on rhea.
-As of 20240718, now includes PSC scripts as well
+`tat2` paper scripts.
+
+ROI means for tat2 parameter permutations are in [`stats/CaudPutPalAccVentCC.csv`](stats/CaudPutPalAccVentCC.csv)
+
+
+Initially, this directory links to other directories on rhea.
+As of 20240718, now includes PSC scripts as well.
 
 This code lives on briges/PSC
 `/ocean/projects/soc230004p/shared/tat2-validation`
@@ -9,9 +13,10 @@ and on rhea
 `/Volumes/Hera/Projects/tat2`
 
 ## Data quality
+`rhea` specific scripts in
 [`scripts/check/`](scripts/check) calculates metrics to assess warp quality across the dataset
-  * Warps [`scripts/check/all_nii/bad_alignments.csv`](scripts/check/all_nii/bad_alignments.csv) from [`scripts/check/all_nii/all_meants_enorm.1D`](scripts/check/all_nii/all_meants_enorm.1D)
-  * Ventrical roi stats [`scripts/check/vent_summary_zscored.tsv`](scripts/check/vent_summary_zscored.tsv)
+  * across subject MNI tmean-to-tmean warps as a measure of alignment quality are in [`scripts/check/all_nii/bad_alignments.csv`](scripts/check/all_nii/bad_alignments.csv) from [`scripts/check/all_nii/all_meants_enorm.1D`](scripts/check/all_nii/all_meants_enorm.1D)
+  * per session ventricle tmean ROI stats are in [`scripts/check/vent_summary_zscored.tsv`](scripts/check/vent_summary_zscored.tsv)
 
 
 ## Permutations
