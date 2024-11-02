@@ -4,9 +4,9 @@
 #+NAME: r2p-dt
 /Volumes/Phillips/mMR_PETDA/scripts/r2pvox/r2primeMap_datatable.txt
 
-Pulling R2Prime derivatives from a data table last modified src_bash[:exports results :var dt=r2p-dt]{stat -c "%y" $dt} {{{results(=2024-07-18 14:54:40.000000000 -0400=)}}}
+Pulling R2Prime derivatives from a data table last modified src_bash[:var dt=r2p-dt]{stat -c "%y" $dt} {{{results(=2024-07-18 14:54:40.000000000 -0400=)}}}
  with ~InputFile~ column pointing to ~213~ ~1mm iso~ 3D MNI images.
-#+begin_src bash :export results :results verbatim :var dt=r2p-dt
+#+begin_src bash :exports results :results verbatim :var dt=r2p-dt
   sed '2q' $dt
 #+end_src
 
@@ -15,7 +15,7 @@ Pulling R2Prime derivatives from a data table last modified src_bash[:exports re
 : 10195	22.1190965092402	0.0452098031934646	M	../../subjs/10195_20160317/r2prime/r2primeMap_MNI152_T1_2009c_al.nii.gz
 
 
-#+begin_src bash :dir /Volumes/Phillips/mMR_PETDA/scripts/r2pvox/ :async :export both
+#+begin_src bash :dir /Volumes/Phillips/mMR_PETDA/scripts/r2pvox/ :async :exports both
 cut -f 5 r2primeMap_datatable.txt |sed 1d| parallel -X -J 5  3dinfo -ad3 -n4|sort |uniq -c
 #+end_src
 
@@ -37,10 +37,10 @@ The atlas is (lazily) **up-sampled** rather than recombining original inputs to 
 | 1.0 | 1.0 | 1.0 | 193 | 229 | 193 | 1 | ../../atlases/atlas-VentCCCaudPutPalAcc_res-r2p.nii.gz  |
 
 * Outputs
-[[file:./01_roistats.bash]] uses lncdtool ~3dmaskave_grp~ to crate [[file:../../stats/r2p_CaudPutPalAcc.csv]]
+[[file:./01_roistats.bash]] uses lncdtool ~3dmaskave_grp~ to create [[file:../../stats/r2p_CaudPutPalAcc.csv]]
 
 #+begin_src R :exports both :colnames yes :session
-#library(dplyr)
+library(dplyr)
 d <- read.csv('../../stats/r2p_CaudPutPalAcc.csv')
 d |>
     select("roi","nzmean","nzvoxels","nzsigma") |>
