@@ -35,6 +35,13 @@ atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles_res-func.nii.gz ref/JH
 	       -expr '1*v*step(v-c) + 2*c + h' \
 	       -prefix $@
 
+EX_R2P=/Volumes/Phillips/mMR_PETDA/subjs/10195_20160317/r2prime/r2primeMap_MNI152_T1_2009c_al.nii.gz
+
+# TODO: build and resample with original atlases
+# 20241102:double resample and second is upscale (3->1mm) on what was orginally 1mm
+atlas-VentCCCaudPutPalAcc_res-r2p.nii.gz: atlas-VentCCCaudPutPalAcc_res-func.nii.gz
+	3dresample -rmode NN -inset $< -master $(EX_R2P) -prefix $@
+
 HarOx-thr50-CaudPutPalAcc_res-func.nii.gz: HarvardOxford-sub-maxprob-thr50-1mm.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ \
 		-inset '3dcalc( -a $< -expr amongst(a,5,16,6,17,11,21,7,18)*a )'
@@ -44,6 +51,5 @@ HarOx-thr50-CaudPutPalAcc_labels.tsv:
 		/usr/share/fsl/data/atlases/HarvardOxford-Subcortical.xml |\
 		grep -P '^(5|16|6|17|11|21|7|18)\t' > $@
 
-	
 %/:
 	mkdir -p $@
