@@ -21,11 +21,22 @@ ref/CerebrA.nii.gz: | ref/
 	3dNotes -h 'curl https://gin.g-node.org/anamanera/CerebrA/raw/master/CerebrA.nii' $@
 	3drefit -space MNI $@
 
+# 20241102 -- useful for 3dmaskave compare, but not used in tat2 ref or atlas pipeline
+ref/CerebrA_res-func.nii.gz: ref/CerebrA.nii.gz
+	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset $<
+
 ref/ventricles_res-func.nii.gz: ref/CerebrA.nii.gz
-	# 37 = R 3rd vent; 88 =L 3rd vent;  41 = R vent; 92 = L vent;
+	# 37 = R 4th vent; 88 =L 4th vent;  41 = R vent; 92 = L vent;
 	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92,88,37) )' -prefix /tmp/ref-ventricle-cerebra.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle-cerebra.nii.gz
 	3drefit -space MNI $@
+
+ref/ventricles3_res-func.nii.gz: ref/CerebrA.nii.gz
+	# 29 = R 3rd vent; 80 =L 3rd vent;  41 = R vent; 92 = L vent;
+	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92,80,29) )' -prefix /tmp/ref-ventricle3-cerebra.nii.gz
+	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle3-cerebra.nii.gz
+	3drefit -space MNI $@
+
 
 atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
 	# c and v overlap in 24mm. assign to c instead of v
