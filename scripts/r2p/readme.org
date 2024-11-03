@@ -24,9 +24,19 @@ cut -f 5 r2primeMap_datatable.txt |sed 1d| parallel -X -J 5  3dinfo -ad3 -n4|sor
 
 ** Matching atlas
 The EPI BOLD derivatives are 2.3 iso.
-The atlas is (lazily) **up-sampled** rather than recombining original inputs to match.
-( <2024-11-02 Sat> [[file:../../atlases/Makefile]] )
+The atlas is (lazily) *up-sampled* rather than recombining original inputs to match.
+#+begin_details
+#+begin_summary
+From <2024-11-02 Sat> in [[file:../../atlases/Makefile]]
+#+end_summary
+#+begin_src Makefile
+EX_R2P=/Volumes/Phillips/mMR_PETDA/subjs/10195_20160317/r2prime/r2primeMap_MNI152_T1_2009c_al.nii.gz
+atlas-VentCCCaudPutPalAcc_res-r2p.nii.gz: atlas-VentCCCaudPutPalAcc_res-func.nii.gz
+	3dresample -rmode NN -inset $< -master $(EX_R2P) -prefix $@
+#+end_src
+#+end_details
 
+*** Resolutions
 #+begin_src bash :exports both
   3dinfo -ad3 -n4 -iname \
     ../../atlases/atlas-VentCCCaudPutPalAcc_res-{func,r2p}.nii.gz
@@ -35,6 +45,8 @@ The atlas is (lazily) **up-sampled** rather than recombining original inputs to 
 #+RESULTS:
 | 2.3 | 2.3 | 2.3 |  84 | 100 |  84 | 1 | ../../atlases/atlas-VentCCCaudPutPalAcc_res-func.nii.gz |
 | 1.0 | 1.0 | 1.0 | 193 | 229 | 193 | 1 | ../../atlases/atlas-VentCCCaudPutPalAcc_res-r2p.nii.gz  |
+
+
 
 * Outputs
 [[file:./01_roistats.bash]] uses lncdtool ~3dmaskave_grp~ to create [[file:../../stats/r2p_CaudPutPalAcc.csv]]
