@@ -31,6 +31,12 @@ ref/ventricles_res-func.nii.gz: ref/CerebrA.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle-cerebra.nii.gz
 	3drefit -space MNI $@
 
+ref/ventricles2_res-func.nii.gz: ref/CerebrA.nii.gz
+	# 41 = R vent; 92 = L vent;
+	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92) )' -prefix /tmp/ref-ventricle2-cerebra.nii.gz
+	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle2-cerebra.nii.gz
+	3drefit -space MNI $@
+
 ref/ventricles3_res-func.nii.gz: ref/CerebrA.nii.gz
 	# 29 = R 3rd vent; 80 =L 3rd vent;  41 = R vent; 92 = L vent;
 	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92,80,29) )' -prefix /tmp/ref-ventricle3-cerebra.nii.gz

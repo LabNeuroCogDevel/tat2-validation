@@ -20,7 +20,7 @@ export PATH="$PATH:/ocean/projects/soc230004p/shared/tools/lncdtools:/ocean/proj
 FD_THRESH=0.3
 
 REF_CC="$ATLAS_DIR/ref/JHU-ICBM-CCbody_res-func.nii.gz"
-REF_VENT="$ATLAS_DIR/ref/ventricles_res-func.nii.gz"
+REF_VENT="$ATLAS_DIR/ref/ventricles3_res-func.nii.gz"
 
 # '_var-$var'
 _name() {
@@ -42,7 +42,7 @@ _name() {
     # ref
     *subject_mask*) varval=wholebrain;;
     *CC*.nii.gz)    varval=CC;;
-    *ventricles*.nii.gz) varval=vent;;
+    *ventricles*.nii.gz) varval=vent3;;
     # calcs
     *zscore*)  varval=zscore;;
     *calc_ln)  varval=log;;
@@ -157,5 +157,5 @@ test_ref_name() { # @test
 
   ref=$REF_VENT
   name=$(_name ref)
-  [[ $name == "_ref-vent" ]]
+  [[ $name == "_ref-vent3" ]]
 }

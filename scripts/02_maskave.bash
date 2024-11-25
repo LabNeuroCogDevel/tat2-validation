@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=1
 
 # run like
-#  sbatch -J summary -o log/%x_%A_%j.txt 02_maskave.bash
+#  sbatch -J summary -o log/%x_%A_%j.txt -e log/%x_%A_%j.txt 02_maskave.bash
 #  always remakes ../stats/: atlas-roistats.tsv run_info.tsv
 #  see scripts/03_parseROIstats.R to make CaudPutPalAccVentCC.csv
 set -euo pipefail
