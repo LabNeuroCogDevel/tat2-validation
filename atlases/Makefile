@@ -44,12 +44,13 @@ ref/ventricles3_res-func.nii.gz: ref/CerebrA.nii.gz
 	3drefit -space MNI $@
 
 
-atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
+atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles3_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
 	# c and v overlap in 24mm. assign to c instead of v
-	3dcalc -v ref/ventricles_res-func.nii.gz \
+	3dcalc -v ref/ventricles3_res-func.nii.gz \
 	       -c ref/JHU-ICBM-CCbody_res-func.nii.gz \
 	       -h  HarOx-thr50-CaudPutPalAcc_res-func.nii.gz \
 	       -expr '1*v*step(v-c) + 2*c + h' \
+	       -overwrite \
 	       -prefix $@
 
 EX_R2P=/Volumes/Phillips/mMR_PETDA/subjs/10195_20160317/r2prime/r2primeMap_MNI152_T1_2009c_al.nii.gz
