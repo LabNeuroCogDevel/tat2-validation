@@ -31,6 +31,12 @@ ref/ventricles_res-func.nii.gz: ref/CerebrA.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle-cerebra.nii.gz
 	3drefit -space MNI $@
 
+ref/ventricles2_res-func.nii.gz: ref/CerebrA.nii.gz
+	# 41 = R vent; 92 = L vent;
+	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92) )' -prefix /tmp/ref-ventricle2-cerebra.nii.gz
+	3dresample -master $(example_nii) -rmode NN -prefix $@ -inset /tmp/ref-ventricle2-cerebra.nii.gz
+	3drefit -space MNI $@
+
 ref/ventricles3_res-func.nii.gz: ref/CerebrA.nii.gz
 	# 29 = R 3rd vent; 80 =L 3rd vent;  41 = R vent; 92 = L vent;
 	3dmask_tool -dilate_input -1 -input '3dcalc( -a $< -expr amongst(a,41,92,80,29) )' -prefix /tmp/ref-ventricle3-cerebra.nii.gz
@@ -38,12 +44,13 @@ ref/ventricles3_res-func.nii.gz: ref/CerebrA.nii.gz
 	3drefit -space MNI $@
 
 
-atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
+atlas-VentCCCaudPutPalAcc_res-func.nii.gz: ref/ventricles3_res-func.nii.gz ref/JHU-ICBM-CCbody_res-func.nii.gz HarOx-thr50-CaudPutPalAcc_res-func.nii.gz
 	# c and v overlap in 24mm. assign to c instead of v
-	3dcalc -v ref/ventricles_res-func.nii.gz \
+	3dcalc -v ref/ventricles3_res-func.nii.gz \
 	       -c ref/JHU-ICBM-CCbody_res-func.nii.gz \
 	       -h  HarOx-thr50-CaudPutPalAcc_res-func.nii.gz \
 	       -expr '1*v*step(v-c) + 2*c + h' \
+	       -overwrite \
 	       -prefix $@
 
 EX_R2P=/Volumes/Phillips/mMR_PETDA/subjs/10195_20160317/r2prime/r2primeMap_MNI152_T1_2009c_al.nii.gz
