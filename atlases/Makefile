@@ -58,7 +58,7 @@ EX_R2P=/Volumes/Phillips/mMR_PETDA/subjs/10195_20160317/r2prime/r2primeMap_MNI15
 # TODO: build and resample with original atlases
 # 20241102:double resample and second is upscale (3->1mm) on what was orginally 1mm
 atlas-VentCCCaudPutPalAcc_res-r2p.nii.gz: atlas-VentCCCaudPutPalAcc_res-func.nii.gz
-	3dresample -rmode NN -inset $< -master $(EX_R2P) -prefix $@
+	3dresample -overwrite -rmode NN -inset $< -master $(EX_R2P) -prefix $@
 
 HarOx-thr50-CaudPutPalAcc_res-func.nii.gz: HarvardOxford-sub-maxprob-thr50-1mm.nii.gz
 	3dresample -master $(example_nii) -rmode NN -prefix $@ \
