@@ -17,8 +17,8 @@ roistats_long <- roistats |>
   filter(!grepl('inv.bak|^name$',name)) |> # remove accidental nested back dir, remove redundant header
                                            # (too many files, multile ROIStats via xargs)
   pivot_longer(cols=matches('_\\d+$'), names_to="measure") |>
-  mutate(name=gsub('../output/|.nii.gz_0\\[.*\\]$','',name)) |>
-  separate(name,c("id","run","fname"),sep="/") |>
+  mutate(name=gsub('.*tat2_wudktm/|.nii.gz_0\\[.*\\]$|_calc','',name)) |>
+  separate(name,c("id","calc"),sep="-",extra="merge") |>
   separate(measure,c("measure","roinum"))
 
 ### roinum to label lookup
