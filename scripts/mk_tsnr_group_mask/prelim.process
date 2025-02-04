@@ -1,0 +1,226 @@
+#!/bin/bash
+
+subject=SUBJECTID
+session=SESID
+data_dir=DATADIR
+input_bucket_1=INPUT1
+input_bucket_2=INPUT2
+output_path=OUTPUT
+run_dir=RUNDIR
+cpu_usage=8
+singularity=`which singularity`
+
+
+module load R
+module load afni
+
+# Clear these variables at the beginning of the script
+num_censor_vols=""
+num_rest_vols=""
+
+# if the subject-specific folder does not exist in temp space, create it
+if [ ! -d ${data_dir}/${subject}/${session}/ ]; then
+    # make a subject & session specific /files/ folder in temp space
+    mkdir -p ${data_dir}/${subject}/${session}/files
+    # make a subject & session specific /masks/ folder in temp space
+    mkdir -p ${data_dir}/${subject}/${session}/masks       
+fi
+
+# if the subject-specific folder does not exist in bart's project directory, create it
+if [ ! -d ${output_path}/${subject}/${session}/ ]; then
+ 	mkdir -p ${output_path}/${subject}/${session}/
+fi
+
+
+# cd into temp space 
+cd ${data_dir}/${subject}/${session}/files/
+
+# loop through the runs & pull the resting state files and mask files from their run-specific folders in input_bucket_1 
+# into the subject & session specific /files/ folder in temp space
+for run in 1 2 3 4; do
+
+    # Define the motion file 
+    motion_file="${subject}_${session}_task-rest_run-0${run}_desc-includingFD_motion.tsv"
+
+    # pull down the run-specific motion.tsv file into temp space (from input_bucket_2)
+    s3cmd get ${input_bucket_2}/${subject}/${session}/func/${motion_file} ${data_dir}/${subject}/${session}/files/
+
+    # copy the motion file into the subject folder in bart's project directory
+    #cp ${data_dir}/${subject}/${session}/files/${motion_file} ${output_path}/${subject}/${session}/
+
+    # Check if the file exists in temp space 
+    if [[ -f "${motion_file}" ]]; then
+
+        # Define the censor file name. NOTE:  %_desc-includingFD_motion.tsv removes this text from the motion_file name
+        censor_file="${motion_file%_desc-includingFD_motion.tsv}-fd0.3_censor.1D"
+
+        # Define variable fd_col as the index number of the column == "framewise_displacement"
+        fd_col=$(sed 1q "${data_dir}/${subject}/${session}/files/${motion_file}" | tr '\t' '\n' | cat -n | grep "framewise_displacement" | awk '{print $1}')
+
+        # Check if the column index was found
+        if [[ -z "$fd_col" ]]; then
+            echo "Error: 'framewise_displacement' column not found in ${motion_file}" >&2
+            exit 1
+        fi
+
+        # Use awk to process the motion file using the fd_col variable defined above
+        # awk command NR > 2 skips the first two rows of the motion file (the header & the 1st row of 0 padding that should not be there)
+        awk -v col="$fd_col" 'NR > 2 { print $col, ($col < 0.3) ? 1 : 0 }' "${data_dir}/${subject}/${session}/files/${motion_file}" > "${data_dir}/${subject}/${session}/files/${censor_file}"
+        
+        # copy the censor file into the subject folder in bart's project directory
+        #cp ${data_dir}/${subject}/${session}/files/${censor_file} ${output_path}/${subject}/${session}/
+    
+        # pull down the run-specific resting state file to the /files/ folder on temp
+        s3cmd get ${input_bucket_1}/${subject}/${session}/files/${session}_task-rest_run-0${run}/${session}_task-rest_run-0${run}_nonlin.nii.gz ${data_dir}/${subject}/${session}/files/
+        # copy the resting state files into bart's share dirve
+        #cp ${data_dir}/${subject}/${session}/files/${session}_task-rest_run-0${run}_nonlin.nii.gz ${output_path}/${subject}/${session}/
+
+        # pull down the run-specific mask file to the /masks/ folder on temp
+        s3cmd get ${input_bucket_1}/${subject}/${session}/files/${session}_task-rest_run-0${run}/brainmask_fs.2.0.nii.gz ${data_dir}/${subject}/${session}/masks/${session}_run-0${run}_brainmask_fs.2.0.nii.gz  
+        # copy the masks into bart's share dirve
+        #cp ${data_dir}/${subject}/${session}/masks/${session}_run-0${run}_brainmask_fs.2.0.nii.gz ${output_path}/${subject}/${session}/      
+    fi
+done 
+
+# Check for corresponding censor and resting state files for each run and delete unmatched files
+for run in 1 2 3 4; do
+    censor_file="${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_run-0${run}-fd0.3_censor.1D"
+    resting_state_file="${data_dir}/${subject}/${session}/files/${session}_task-rest_run-0${run}_nonlin.nii.gz"
+
+    if [[ -f "$censor_file" && -f "$resting_state_file" ]]; then
+        echo "Both censor file and resting state file exist for run $run"
+    else
+        if [[ -f "$censor_file" ]]; then
+            echo "Deleting unmatched censor file for run $run"
+            rm "$censor_file"
+        fi
+        if [[ -f "$resting_state_file" ]]; then
+            echo "Deleting unmatched resting state file for run $run"
+            rm "$resting_state_file"
+        fi
+    fi
+done
+
+
+# copy all existing censor files into the subject folder in bart's share drive 
+cp ${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_run-0*-fd0.3_censor.1D ${output_path}/${subject}/${session}/
+
+# copy the existing resting state files into bart's share drive
+#cp ${data_dir}/${subject}/${session}/files/${session}_task-rest_run-0*_nonlin.nii.gz ${output_path}/${subject}/${session}/
+
+
+# Now run the R-script to make the minimal censor file
+# if any censor files exist in the temp space, run teh R script to create the minimal censor file
+if ls ${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_run-0*-fd0.3_censor.1D; then
+    input_arg1=${subject} 
+    input_arg2=${session} 
+
+    Rscript /home/bart/shared/projects/dR2star_valid/scripts/make_censor.R $input_arg1 $input_arg2
+    
+    # copy the minimal censor file to the temp space (where the tat2 script will execute)
+    cp ${output_path}/${subject}/${session}/${subject}_${session}_minimal_censor.ID ${data_dir}/${subject}/${session}/files/
+    # copy the insufficient_volumes.txt file to the temp space (if it was created)
+    cp ${output_path}/${subject}/${session}/insufficient_volumes.txt ${data_dir}/${subject}/${session}/files/
+else
+    # Exit the loop if no censor files exist
+    echo "No censor files exist. Exiting..."
+    exit 1  # Exit the script with a failure code
+fi
+
+# delete the run-level censor files from bart's share drive 
+rm ${output_path}/${subject}/${session}/${subject}_${session}_task-rest_run-0*-fd0.3_censor.1D
+
+#if statement here to check if insufficient_volumes.txt exists in the temp space
+if [ ! -f ${data_dir}/${subject}/${session}/files/insufficient_volumes.txt ]; then
+
+    # make an intersection / union of the run masks 
+    3dmask_tool -input ${data_dir}/${subject}/${session}/masks/${session}_run*_brainmask_fs.2.0.nii.gz -inter -prefix ${data_dir}/${subject}/${session}/masks/${subject}_${session}_union_mask.nii.gz
+    # save the union mask to bart's share drive
+    #cp ${data_dir}/${subject}/${session}/masks/${subject}_${session}_union_mask.nii.gz ${output_path}/${subject}/${session}/
+
+    # pull down the T1 MNI brain file to bart's share drive
+    s3cmd get ${input_bucket_2}/${subject}/${session}/anat/${subject}_${session}_T1w_space-MNI_brain.nii.gz ${output_path}/${subject}/${session}/
+
+    # concatenate the resting state files
+    3dTcat -prefix ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest.nii.gz ${data_dir}/${subject}/${session}/files/${session}_task-rest_run-0*_nonlin.nii.gz
+    # save the concatenated resting state files to bart's share dirve 
+    #cp ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest.nii.gz ${output_path}/${subject}/${session}/
+    
+    # Print the contents of the temp directory and save to a .txt file
+    #echo "Listing contents of ${data_dir}/${subject}/${session}/files/:" > "${output_path}/${subject}/${session}/temp_directory_contents.txt"
+    #ls -al "${data_dir}/${subject}/${session}/files/" >> "${output_path}/${subject}/${session}/temp_directory_contents.txt"
+
+    
+    # check if volumes in the concat rest & minimal censor file match
+
+    # get the number of rows in the minimal censor file
+    num_censor_vols=$(wc -l < ${data_dir}/${subject}/${session}/files/${subject}_${session}_minimal_censor.ID)
+
+    # get the number of volumes in the concatenated resting state file
+    num_rest_vols=$(3dinfo -nv ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest.nii.gz)
+
+    # compare the two values
+    if [ "$num_censor_vols" -eq "$num_rest_vols" ]; then
+
+        # if the values match, make the tsnr map
+
+        # first, mask the concatenated resting state file with the union mask
+        3dcalc -a ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest.nii.gz -b ${data_dir}/${subject}/${session}/masks/${subject}_${session}_union_mask.nii.gz -expr 'a*step(b)' -prefix ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest_masked.nii.gz
+
+        # define the input file
+        concat_rest=${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest_masked.nii.gz
+        # define the output files
+        mean_signal_map=${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest_mean_signal_map.nii.gz
+        stdev_map=${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest_stdev_map.nii.gz
+        tsnr_map=${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_tsnr_map.nii.gz
+        
+        # make mean signal map
+        3dTstat -mean -prefix ${mean_signal_map} ${concat_rest}
+        
+        # make standard deviation map
+        3dTstat -stdevNOD -prefix ${stdev_map} ${concat_rest}
+    
+        # Calculate tsnr map
+        3dcalc -a ${mean_signal_map} -b ${stdev_map} -expr 'a/b' -prefix ${tsnr_map}
+
+        # save the tsnr map to bart's share drive
+        cp ${tsnr_map} ${output_path}/${subject}/${session}/
+
+        # Define threshold(s) for tsnr map
+        #thresholds=(3 3.33 3.66 4)
+        thresholds=(3)
+
+       
+        # Loop through each threshold
+        for threshold in "${thresholds[@]}"; do
+
+            # Create thresholded tsnr map
+            thresholded_tsnr_map=${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_tsnr_thresholded_${threshold}_map.nii.gz
+            3dcalc -a ${tsnr_map} -expr "step(a-${threshold})*a" -prefix ${thresholded_tsnr_map}
+            # copy the thresholded tsnr map to bart's share drive
+            cp ${thresholded_tsnr_map} ${output_path}/${subject}/${session}/
+        
+            # Create a binarized mask from the thresholded tsnr map with holes filled in
+            binarized_tsnr_map=${data_dir}/${subject}/${session}/files/${subject}_${session}_task-rest_tsnr_thresholded_${threshold}_binarized_filled_mask.nii.gz
+            3dmask_tool -input ${thresholded_tsnr_map} -prefix ${binarized_tsnr_map} -fill_holes
+            # copy the binarized tsnr map to bart's share drive
+            cp ${binarized_tsnr_map} ${output_path}/${subject}/${session}/
+            
+        done
+
+        # if the volumes match, run tat2
+        #tat2 ${data_dir}/${subject}/${session}/files/${subject}_${session}_concat_task-rest.nii.gz -mask ${data_dir}/${subject}/${session}/masks/${subject}_${session}_union_mask.nii.gz -output ${output_path}/${subject}/${session}/${subject}_${session}_task-rest_dR2_star.nii.gz -censor_rel ${data_dir}/${subject}/${session}/files/${subject}_${session}_minimal_censor.ID -median_time -median_vol -calc_ln -noclean -no_voxscale
+        
+
+    else
+        # create a .txt file & print message if they do not match
+        echo -e "num_censor_vols = $num_censor_vols\nnum_rest_vols = $num_rest_vols\ncensor vols and concatenated resting state vols do not match" > ${output_path}/${subject}/${session}/no_match.txt
+        # exit the loop
+        break  # Use exit 1 if you want to exit the script instead
+    fi
+
+else
+    # File exists, exit the loop
+    echo "File insufficient_volumes.txt exists. Exiting the loop..."
+    break  # Use exit 1 if you want to exit the script instead
+fi
