@@ -10,3 +10,4 @@ atlases/ref/CerebrA.nii
 .RData
 .Rhistory
 slurm*out
+.DS_Store
