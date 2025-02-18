@@ -24,12 +24,11 @@ tsnr_mask_main() {
    ## summary files
    # coverage mask based on .95%
    dryrun 3dMean -prefix tsnr/${seq}_thres-3_coverage.nii.gz      -overwrite\
-      "tsnr/${seq}/*_thres-3_mask.nii.gz"
+      tsnr/${seq}/*_thres-3_mask.nii.gz
    dryrun 3dcalc -prefix tsnr/${seq}_thres-3_coverage95bin.nii.gz -overwrite \
       -expr 'step(a-.95)' -a tsnr/${seq}_thres-3_coverage.nii.gz
    # tsnr mean
-   dryrun 3dMean -prefix tsnr/${seq}_tsnr_mean.nii.gz  -overwrite $outdir/*_tsnr.nii.gz
-   break
+   dryrun 3dMean -non_zero -prefix tsnr/${seq}_tsnr_mean.nii.gz  -overwrite $outdir/*_tsnr.nii.gz
  done
 
 }
