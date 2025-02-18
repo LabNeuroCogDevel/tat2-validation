@@ -59,7 +59,20 @@ _name() {
 
 mk_censor(){
   local file=$1 thres=$2
-  awk -v thres=$thres '{print $1>=thres?0:1}' $file
+  awk -v thres="$thres" '{print $1>=thres?0:1}' "$file"
+}
+
+#  for mk_tsnr_group_mask/02_tat2_grpmask.bash
+#  assume fd.txt is framewise displacement (value per line = volume) 
+#  and is sibling to requested censor file
+mk_censor_find_fd(){
+   local cen="${1-?censor.1D file}" thres="${2-?FD threshold}"
+   [ -r "$cen" ] && return 0
+   fd=$(dirname "$cen")/fd.txt
+   [ ! -s "$fd" ] &&
+      echo "# ERROR: no fd file to make censor: have neither '$fd', '$cen'" &&
+      return 1
+   mk_censor  "$fd" "$thres" | drytee "$cen"
 }
 
 
