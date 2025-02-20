@@ -1,3 +1,4 @@
 mk_tsnr_group_mask/tsnr/tsnr_idv_stats.tsv filter=lfs diff=lfs merge=lfs -text
 mk_tsnr_group_mask/tsnr/rac1_maskcnt-idvInGrp.tsv filter=lfs diff=lfs merge=lfs -text
 mk_tsnr_group_mask/tsnr/rac2_maskcnt-idvInGrp.tsv filter=lfs diff=lfs merge=lfs -text
+mk_tsnr_group_mask/atlas-roistats.tsv filter=lfs diff=lfs merge=lfs -text
